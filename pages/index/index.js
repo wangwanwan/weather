@@ -22,18 +22,8 @@ Page({
     nowWeather: '',
     nowWeatherBg: ''
   },
-  onLoad() {
-    // wx.request({
-    //   url: 'https://restapi.amap.com/v3/weather/weatherInfo',
-    //   data: {
-    //     key: '06c557e11ad6add4d87a9418eac6cc03',
-    //     city:'310115'
-    //   },
-    //   success: res => {
-    //     console.log(res.data);
-    //   }      
-    // })
 
+  getNow(callback) {
     wx.request({
       url: 'https://test-miniprogram.com/api/weather/now',
       data: {
@@ -53,11 +43,31 @@ Page({
           backgroundColor: weatherColorMap[weather]
         })
         console.log(temp, weather);
+      },
+      complete: () => {
+        callback && callback();
       }
     })
   },
+  onLoad() {
+    //高德天气API
+    // wx.request({
+    //   url: 'https://restapi.amap.com/v3/weather/weatherInfo',
+    //   data: {
+    //     key: '06c557e11ad6add4d87a9418eac6cc03',
+    //     city:'310115'
+    //   },
+    //   success: res => {
+    //     console.log(res.data);
+    //   }      
+    // })
+    this.getNow();
+  },
 
   onPullDownRefresh() {
-    console.log('hahahaha')
+    this.getNow(
+      wx.stopPullDownRefresh()
+    );
+    console.log('hahahaha22')
   }
 })
