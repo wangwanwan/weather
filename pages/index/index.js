@@ -97,5 +97,10 @@ Page({
       wx.stopPullDownRefresh()
     );
     console.log('hahahaha22')
+  },
+  dayTapWeather() {
+    wx.navigateTo({
+      url: '/pages/list/list',
+    })
   }
 })
