@@ -16,6 +16,17 @@ const weatherColorMap = {
   'heavyrain': '#c5ccd0',
   'snow': '#aae1fc'
 }
+
+const UNPROMPTED = 0;
+const UNAUTHORIZED = 1;
+const AUTHORIZED = 2;
+
+const UNPROMPTED_TIPS = "点击获取当前位置";
+const UNAUTHORIZED_TIPS = "点击开启位置权限";
+const AUTHORIZED_TIPS = "";
+
+const QQMapWX = require('../../libs/qqmap-wx-jssdk.js');
+var qqmapsdk;
 Page({
   data: {
     nowTemp: '',
@@ -23,14 +34,17 @@ Page({
     nowWeatherBg: '',
     hourlyWeather: [],
     todayTemp: '',
-    todayDate: ''
+    todayDate: '',
+    city: '广州市',
+    locationTipsText: UNPROMPTED_TIPS,
+    locationAuthType: UNPROMPTED
   },
 
   getNow(callback) {
     wx.request({
       url: 'https://test-miniprogram.com/api/weather/now',
       data: {
-        city: '上海市'
+        city: this.data.city
       },
       success: res => {
         let result = res.data.result;
@@ -89,6 +103,10 @@ Page({
     //     console.log(res.data);
     //   }      
     // })
+
+    this.qqmapsdk = new QQMapWX({
+      key: 'MFQBZ-UMDLD-CFP4V-P342H-UA5C2-CXF6K'
+    });
     this.getNow();
   },
 
@@ -100,7 +118,42 @@ Page({
   },
   dayTapWeather() {
     wx.navigateTo({
-      url: '/pages/list/list',
+      url: '/pages/list/list?city=' + this.data.city,
+    })
+  },
+  onTapLocation() {
+    this.getLocation();
+  },
+
+  getLocation() {
+    wx.getLocation({
+      success: res => {
+        console.log(res.latitude, res.longitude)
+        this.setData({
+          locationAuthType: AUTHORIZED,
+          locationTipsText: AUTHORIZED_TIPS
+        })
+        this.qqmapsdk.reverseGeocoder({
+          location: {
+            latitude: res.latitude,
+            longitude: res.longitude
+          },
+          success: res => {
+            let city = res.result.address_component.city
+            this.setData({
+              city: city
+            })
+          }
+        });
+        this.getNow();
+      },
+      fail: () => {
+        this.setData({
+          locationAuthType: UNAUTHORIZED,
+          locationTipsText: UNAUTHORIZED_TIPS
+        })
+        console.log('fail')
+      }
     })
   }
 })
